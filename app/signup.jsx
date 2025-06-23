@@ -1,4 +1,3 @@
-// app/index.jsx (Login Screen)
 import React, { useState } from 'react';
 import {
   StyleSheet,
@@ -13,21 +12,20 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { API_BASE_URL } from '../env';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const Login = () => {
+const Signup = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
+  const handleSignup = async () => {
     if (!username.trim() || !password.trim()) {
       Alert.alert('Error', 'Please fill in both username and password');
       return;
     }
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -35,32 +33,31 @@ const Login = () => {
         body: JSON.stringify({ username, password }),
       });
       const data = await response.json();
-      if (response.ok && data.token) {
-        //console.log('Login successful:', data.token);
-        await AsyncStorage.setItem('token', data.token);
-        router.push('/home');
+      if (response.ok) {
+        Alert.alert('Success', 'Account created! Please log in.');
+        router.replace('/');
       } else {
-        Alert.alert('Login Failed', data.message || 'Invalid credentials');
+        Alert.alert('Sign Up Failed', data.message || 'Could not create account');
       }
     } catch (error) {
       Alert.alert('Error', 'Network error. Please try again.');
-      console.error('Login error:', error);
+      console.error('Signup error:', error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
+    <KeyboardAvoidingView
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <StatusBar barStyle="dark-content" backgroundColor="#f8f9fa" />
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>GrammAI</Text>
-          <Text style={styles.title}>Grammer Checker</Text>
-          <Text style={styles.subtitle}>Sign in to continue</Text>
+          <Text style={styles.title}>Sign Up</Text>
+          <Text style={styles.subtitle}>Create a new account</Text>
         </View>
         <View style={styles.form}>
           <View style={styles.inputContainer}>
@@ -88,24 +85,26 @@ const Login = () => {
           </View>
           <TouchableOpacity
             style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={handleLogin}
+            onPress={handleSignup}
             disabled={loading}
           >
             <Text style={styles.buttonText}>
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? 'Signing up...' : 'Sign Up'}
             </Text>
           </TouchableOpacity>
         </View>
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Don't have an account?{' '}
-            <Text style={{ color: '#0984e3' }} onPress={() => router.replace('/signup')}>Sign Up</Text>
+            Already have an account?{' '}
+            <Text style={{ color: '#0984e3' }} onPress={() => router.replace('/')}>Sign In</Text>
           </Text>
         </View>
       </View>
     </KeyboardAvoidingView>
   );
 };
+
+export default Signup;
 
 const styles = StyleSheet.create({
   container: {
@@ -177,5 +176,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-
-export default Login;
